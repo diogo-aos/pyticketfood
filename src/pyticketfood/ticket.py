@@ -1,10 +1,7 @@
 import datetime as dt
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from pathlib import Path
-import pickle
-import warnings
-
 import bs4
 import requests
 
@@ -15,6 +12,25 @@ class Transaction:
     date: dt.datetime
     value: float
     description: str
+
+
+
+
+
+def parse_balance(html_content: str) -> Optional[float]:
+    # Create a BeautifulSoup object to parse the HTML
+    soup = bs4.BeautifulSoup(html_content, 'html.parser')
+    
+    # Find all <label> elements with class "valueLabel"
+    value_labels = soup.find_all('label', class_='valueLabel')
+    
+    if len(value_labels) >= 2:
+        # Extract the text content of the second <label> element
+        account_balance = value_labels[1].get_text()
+        return account_balance.strip()  # Remove leading/trailing whitespace
+    
+    # Return None if there are not enough "valueLabel" elements
+    return None
 
 
 def parse_single_transaction(el: bs4.element.Tag) -> Transaction:
@@ -66,32 +82,12 @@ def get_transactions(username: str, password: str, start_date: dt.datetime, end_
         }
 
         data = {
-            'User': conf.username,
-            'Password': conf.password,
+            'User': username,
+            'Password': password,
         }
         r = session.post('https://hbcartaoticket.unicre.pt/', headers=headers, data=data)
+        balance = parse_balance(r.text)
             
-            
-
-
-        headers = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Connection': 'keep-alive',
-            # 'Cookie': 'ASP.NET_SessionId=chv0olcmzqojke2gz0zyuwdc',
-            'Referer': 'https://hbcartaoticket.unicre.pt/transacoes',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1',
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
-            'sec-ch-ua': '"Not)A;Brand";v="24", "Chromium";v="116"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Linux"',
-        }
-
-        r2 = session.get('https://hbcartaoticket.unicre.pt/area-cliente',  headers=headers)
 
         headers = {
             'Accept': 'text/html, */*; q=0.01',
@@ -120,8 +116,6 @@ def get_transactions(username: str, password: str, start_date: dt.datetime, end_
             headers=headers,
         )
 
-        balance = 0
-
         return balance, parse_transactions(r3.text)
 
 
@@ -138,11 +132,12 @@ def main():
             v_val = os.environ[v_name]
         credentials.append(v_val)
         
-    database_path = Path('database.pickle')
-    ticket = Ticket(creds=credentials, path=database_path)
-    balance, T = ticket.update() # get new transactions, or init database if no db exists yet
+    balance, T = get_transactions(credentials[0], credentials[1],
+                                  dt.date(2022, 1, 1),
+                                  dt.date.today()) # get new transactions, or init database if no db exists yet
     # from now on, I can just call the update method to get **new** transactions
     print(sorted(T, key=lambda x: x.date)) # sort by date
+    print(f"current balnace is {balance}")
 
 
 if __name__ == '__main__':

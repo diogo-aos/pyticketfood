@@ -1,0 +1,48 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+
+
+[project]
+name = "pyticketfood"
+version = "0.0.1"
+description = "Get transactions from ticket food card (ticket.pt)"
+readme = "README.md"
+authors = [{ name = "diogoaos", email = "info@realpython.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["api", "parser", "transactions"]
+dependencies = [
+    "beautifulsoup4>1",
+    "requests>1",
+]
+requires-python = ">=3.7"
+
+[project.optional-dependencies]
+dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
+
+#[project.urls]
+#Homepage = ""
+
+#[project.scripts]
+#realpython = ""
+
+[tool.bumpver]
+current_version = "0.1.0"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message  = "Bump version {old_version} -> {new_version}"
+commit          = true
+tag             = true
+push            = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
+"src/pyticketfood/__init__.py" = ["{version}"]
