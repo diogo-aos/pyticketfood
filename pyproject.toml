@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyticketfood"
-version = "0.0.1"
+version = "0.2.0"
 description = "Get transactions from ticket food card (ticket.pt)"
 readme = "README.md"
 authors = [{ name = "diogoaos", email = "info@realpython.com" }]
@@ -36,7 +36,7 @@ Homepage = "https://github.com/diogo-aos/pyticketfood"
 #realpython = ""
 
 [tool.bumpver]
-current_version = "0.1.0"
+current_version = "0.2.0"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message  = "Bump version {old_version} -> {new_version}"
 commit          = true
